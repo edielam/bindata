@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    /// Directory to store data
+
     #[arg(short, long, default_value = "./storage")]
     storage_dir: PathBuf,
 
@@ -18,27 +18,17 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Create a new stream
     Create {
-        /// Name of the stream
         stream_id: String,
     },
-    /// Write data to a stream
     Write {
-        /// Name of the stream
         stream_id: String,
-        /// Path to file to write
         file: PathBuf,
     },
-    /// Read data from a stream
     Read {
-        /// Name of the stream
         stream_id: String,
-        /// Position to start reading from
         position: usize,
-        /// Number of bytes to read
         length: usize,
-        /// Output file (if not provided, writes to stdout)
         #[arg(short, long)]
         output: Option<PathBuf>,
     },
@@ -47,8 +37,6 @@ enum Commands {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
-
-    // Create storage directory if it doesn't exist
     std::fs::create_dir_all(&cli.storage_dir)?;
 
     let config = StorageConfig {
