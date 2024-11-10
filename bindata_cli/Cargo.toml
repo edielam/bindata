@@ -1,0 +1,24 @@
+[package]
+name = "bindata-storage"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.41.1", features = ["full"] }
+bytes = "1.8.0"
+thiserror = "2.0.1"
+bitvec = "1.0.1"
+lru = "0.12.5"
+clap = { version = "4.5.20", features = ["derive"] }
+anyhow = "1.0.93"
+tempfile = "3.14.0"
+serde_json = "=1.0.1"
+serde = { version = "1.0", features = ["derive"] }
+chrono = "0.4" 
+ratatui = "0.24"
+crossterm = "0.27"
+
+
+[[bin]]
+name = "storage-cli"
+path = "src/bin/cli.rs"

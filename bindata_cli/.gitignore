@@ -1,0 +1,12 @@
+/target
+/storage
+/tests
+/src/cache.rs
+/src/config.rs
+/src/error.rs
+/src/lib.rs
+/src/segment.rs
+/src/storage.rs
+/src/stream.rs
+
+*.dat
