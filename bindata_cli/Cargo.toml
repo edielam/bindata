@@ -18,8 +18,7 @@ chrono = "0.4"
 ratatui = "0.24"
 crossterm = "0.27"
 indicatif = "0.17.8"
-futures = "0.3.31"
-tokio-util = { version = "0.7", features = ["codec"] }
+
 
 [[bin]]
 name = "storage-cli"

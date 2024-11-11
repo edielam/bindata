@@ -7,7 +7,7 @@ use crossterm::{
 };
 use ratatui::{
     backend::{Backend, CrosstermBackend},
-    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    layout::{Alignment, Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph, Wrap},
@@ -83,7 +83,7 @@ impl App {
             stream_read_positions: HashMap::new(),
         };
         
-        app.add_message("Welcome to Binary Storage CLI! Press 'h' for help.".to_string(), Color::Cyan);
+        app.add_message("Welcome to Binary Data Storage CLI! Press 'h' for help.".to_string(), Color::Cyan);
         app.refresh_streams().await;
         
         Ok(app)
@@ -105,7 +105,7 @@ impl App {
             while let Ok(Some(entry)) = entries.next_entry().await {
                 if let Ok(file_type) = entry.file_type().await {
                     if file_type.is_dir() {
-                        if let Some(dir_name) = entry.file_name().to_str() {
+                        if let Some(_dir_name) = entry.file_name().to_str() {
                             let meta_path = entry.path().join("stream.meta");
                             if let Ok(meta_content) = tokio::fs::read_to_string(&meta_path).await {
                                 if let Ok(meta_json) = serde_json::from_str::<Value>(&meta_content) {
@@ -310,7 +310,7 @@ impl App {
             }
 
             // Add a small delay to prevent UI freezing for large streams
-            tokio::time::sleep(Duration::from_millis(10)).await;
+            // tokio::time::sleep(Duration::from_millis(10)).await;
         }
 
         self.add_message(
@@ -342,7 +342,6 @@ fn ui<B: Backend>(f: &mut Frame, app: &App) {
         Span::styled("Binary ", Style::default().fg(Color::Cyan)),
         Span::styled("Data ", Style::default().fg(Color::White)),
         Span::styled("Storage ", Style::default().fg(Color::Cyan)),
-        Span::styled("CLI", Style::default().fg(Color::White)),
     ]);
     
     let title = Paragraph::new(title)
