@@ -175,25 +175,7 @@ impl App {
         }
         Ok(())
     }
-    // async fn handle_upload(&mut self, path: &str) -> io::Result<()> {
-    //     // Verify file exists
-    //     if !tokio::fs::metadata(path).await.is_ok() {
-    //         self.messages.push(format!("Error: File '{}' not found", path));
-    //         return Ok(());
-    //     }
-        
-    //     // Start upload
-    //     match self.upload_file(path).await {
-    //         Ok(_) => {
-    //             self.messages.push(format!("Upload complete: {}", path));
-    //             self.refresh_streams().await;
-    //         }
-    //         Err(e) => {
-    //             self.messages.push(format!("Upload error: {}", e));
-    //         }
-    //     }
-    //     Ok(())
-    // }
+
 }
 
 
