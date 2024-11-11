@@ -26,7 +26,7 @@ use chrono::{DateTime, Local};
 struct StreamMetadata {
     id: String,
     created_at: String,
-    total_size: u64,
+    total_size: usize,
     last_modified: Option<DateTime<Local>>,
 }
 
@@ -45,13 +45,13 @@ struct App {
     input_mode: InputMode,
     input: String,
     messages: Vec<(String, Color)>, 
-    read_position: usize,
+    // read_position: usize,
     read_length: usize,
     upload_progress: Option<(String, u64, u64)>,
     is_loading: bool,
     stream_metadata: HashMap<String, StreamMetadata>,
     help_visible: bool,
-    stream_read_positions: HashMap<String, u64>,
+    stream_read_positions: HashMap<String, usize>,
 }
 
 impl App {
@@ -74,7 +74,7 @@ impl App {
             input_mode: InputMode::Normal,
             input: String::new(),
             messages: Vec::new(),
-            read_position: 0,
+            // read_position: 0,
             read_length: 1024 * 64,
             upload_progress: None,
             is_loading: false,
@@ -121,7 +121,7 @@ impl App {
                                             id: id.to_string(),
                                             created_at: meta_json["created_at"].as_str()
                                                 .unwrap_or("unknown").to_string(),
-                                            total_size: meta_json["total_size"].as_u64().unwrap_or(0),
+                                            total_size: meta_json["total_size"].as_u64().unwrap_or(0) as usize,
                                             last_modified: last_modified,
                                         });
                                     }
@@ -217,7 +217,6 @@ impl App {
         Ok(())
     }
     async fn read_stream_data(&mut self, stream_id: &str) -> io::Result<()> {
-        // Get the stream's total size
         let total_size = self.stream_metadata
             .get(stream_id)
             .map(|meta| meta.total_size)
@@ -228,7 +227,6 @@ impl App {
             return Ok(());
         }
 
-        // Reset or initialize read position for this stream
         let start_position = 0;
         self.stream_read_positions.insert(stream_id.to_string(), start_position);
         
@@ -246,32 +244,61 @@ impl App {
 
             match self.storage.read_data_from_stream(
                 stream_id,
-                current_position as usize,
+                current_position as usize, // Convert to usize for read operation
                 read_size,
             ).await {
                 Ok(data) => {
                     if data.is_empty() {
+                        self.add_message(
+                            format!("Reached end of stream at position {}", current_position),
+                            Color::Yellow
+                        );
                         break;
                     }
 
+                    let bytes_read = data.len();
+                    
                     // Try to display as text, fall back to binary length
                     match String::from_utf8(data.to_vec()) {
                         Ok(text) => {
                             self.add_message(
-                                format!("[Pos {}] {}", current_position, text),
+                                format!("[Pos {} - {} bytes] {}", 
+                                    current_position, 
+                                    bytes_read,
+                                    text
+                                ),
                                 Color::White
                             );
                         }
                         Err(_) => {
                             self.add_message(
-                                format!("[Pos {}] Binary data: {} bytes", current_position, data.len()),
+                                format!("[Pos {} - {} bytes] Binary data", 
+                                    current_position,
+                                    bytes_read
+                                ),
                                 Color::White
                             );
                         }
                     }
 
-                    current_position += data.len() as u64;
-                    self.stream_read_positions.insert(stream_id.to_string(), current_position);
+                    current_position += bytes_read;
+                    
+                    // Safety check to prevent overflow
+                    if current_position > total_size {
+                        self.add_message(
+                            format!("Warning: Read position ({}) exceeded total size ({})", 
+                                current_position, 
+                                total_size
+                            ),
+                            Color::Yellow
+                        );
+                        break;
+                    }
+
+                    self.stream_read_positions.insert(
+                        stream_id.to_string(), 
+                        current_position as usize
+                    );
                 }
                 Err(e) => {
                     self.add_message(
@@ -281,6 +308,9 @@ impl App {
                     break;
                 }
             }
+
+            // Add a small delay to prevent UI freezing for large streams
+            tokio::time::sleep(Duration::from_millis(10)).await;
         }
 
         self.add_message(
