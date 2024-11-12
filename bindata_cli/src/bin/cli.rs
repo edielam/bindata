@@ -716,9 +716,12 @@ async fn run_app<B: Backend>(
                             }
                         }
                         InputMode::Help => {
-                            if let KeyCode::Esc = key.code {
-                                app.input_mode = InputMode::Normal;
-                                app.help_visible = false;
+                            match key.code {
+                                KeyCode::Esc | KeyCode::Char('h') => {
+                                    app.input_mode = InputMode::Normal;
+                                    app.help_visible = false;
+                                }
+                                _ => {}
                             }
                         }
                     }
