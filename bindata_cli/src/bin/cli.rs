@@ -361,10 +361,10 @@ fn ui<B: Backend>(f: &mut Frame, app: &App) {
     };
     
     let mode_text = match app.input_mode {
-        InputMode::Normal => "NORMAL",
-        InputMode::Creating => "CREATE",
-        InputMode::Writing => "WRITE",
-        InputMode::Reading => "READ",
+        InputMode::Normal => "NORMAL - Mode",
+        InputMode::Creating => "CREATE - Mode",
+        InputMode::Writing => "WRITE - Mode",
+        InputMode::Reading => "READ - Mode",
         InputMode::Help => "HELP",
     };
 
@@ -536,7 +536,13 @@ async fn run_app<B: Backend>(
                             match key.code {
                                 KeyCode::Char('q') => return Ok(()),
                                 KeyCode::Char('h') => {
-                                    app.help_visible = !app.help_visible;
+                                    if matches!(app.input_mode, InputMode::Help) {
+                                        app.input_mode = InputMode::Normal;
+                                        app.help_visible = false;
+                                    } else {
+                                        app.input_mode = InputMode::Help;
+                                        app.help_visible = true;
+                                    }
                                 }
                                 KeyCode::Char('c') => {
                                     app.input_mode = InputMode::Creating;
