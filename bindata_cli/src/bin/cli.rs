@@ -227,7 +227,7 @@ impl App {
             return Ok(());
         }
 
-        let start_position = 0;
+        let start_position = total_size;
         self.stream_read_positions.insert(stream_id.to_string(), start_position);
         
         let mut current_position = start_position;
